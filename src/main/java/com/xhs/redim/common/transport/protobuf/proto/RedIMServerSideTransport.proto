@@ -1,0 +1,147 @@
+syntax = "proto3";
+option optimize_for = SPEED;
+
+import "RedIMMessage.proto";
+
+package dto;
+option java_package = "com.xhs.redim.common.transport.protobuf.dto";
+option java_outer_classname = "RedIMServerSideTransportProto";
+
+//服务端发送
+//客户端接收
+message RedIMServerSideTransport {
+  enum Type {
+    Pong = 0;
+    MessageList = 1;
+    ConvMaxSequenceList = 2;
+    ServerBusinessExceptionMessage = 99;
+  }
+
+  //每个消息都带上
+  MetaInfo metaInfo = 1;
+
+  Type type = 2;
+
+  oneof Payload {
+    Pong pong = 3;
+    MessageList messageList = 4;
+    ConvMaxSequenceList convMaxSequenceList = 5;
+    ServerBusinessExceptionMessage serverBusinessExceptionMessage = 99;
+  }
+}
+
+message Pong {
+
+}
+
+message MessageList {
+    repeated Message list = 1;
+}
+message ConvMaxSequenceList {
+  repeated ConvMaxSequence list = 1;
+}
+//所有字段均不可为null
+message Message {
+  string id = 1;
+
+  //无内容时为""
+  string operateCode = 2;
+
+  string conversationId = 3;
+
+  //transition消息的seq为MessageConstants#RPC_NULL_VAL_SEQ（0）
+  int64 seq = 4;
+
+  //不存在refId时，为MessageConstants#RPC_NULL_VAL_REF_MESSAGE_ID（0）
+  string refId = 5;
+
+  int32 category = 6;
+
+  int32 type = 7;
+
+  //无内容时为""
+  string abbrevContent = 8;
+
+  //无内容时为""，定义为RedIMMessage的bytes
+  bytes data = 9;
+
+  //无内容时为空list
+  repeated MessageExt extList = 10;
+
+  //不可为null，万一降级没有creator，也要有一个默认的，里面字段是“”
+  string creatorId = 11;
+
+  //更新或撤回会导致ver++
+  int32 version = 12;
+
+  //当前消息是否被撤回，1已被撤回
+  bool recallFlag = 13;
+
+  //当前消息是否被更新过，1已被更新
+  bool updateFlag = 14;
+
+  //是否参与计数，1为不参与计数
+  bool skipRedDotFlag = 15;
+
+  //是否不显示，
+  int32 displayLevel = 16;
+
+  //transition消息为1
+  bool transitionFlag = 17;
+
+  //服务端时间
+  int64 sendTime = 18;
+
+  //最后更新时间
+  int64 lastUpdateTime = 19;
+
+  //发送消息时，会话成员版本，一般用于备查
+  int32 memberVersion = 20;
+
+  //可能为null
+  AccountInfo creatorInfo = 21;
+
+  //是否重号seq推送
+  int32 messagePushType = 22;
+}
+
+message MessageExt {
+  string key = 1;
+  string val = 2;
+}
+
+/**
+  * 用于通知客户端会话的max seq
+ */
+message ConvMaxSequence {
+  //会话内最大的seq
+  string convId = 1;
+  int64 seq = 2;
+}
+
+message MetaInfo {
+  int64 serverCurrentMilli = 1;
+  string serverIP = 2;
+}
+
+message AccountInfo {
+  //账号id
+  string accountId = 1;
+  //账号来源id
+  string sourceId = 2;
+  //账号来源类型
+  int32 sourceType = 3;
+  //账号姓名
+  string displayName = 4;
+  //账号头像
+  string avatar = 5;
+  //账号类型
+  int32 type = 6;
+}
+
+message ServerBusinessExceptionMessage {
+  int32 code = 1;
+  string message = 2;
+}
+
+//protoc RedIMTransportProto.proto --java_out=../dto

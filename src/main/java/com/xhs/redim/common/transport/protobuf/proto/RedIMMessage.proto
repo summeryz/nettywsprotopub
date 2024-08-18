@@ -1,0 +1,122 @@
+syntax = "proto3";
+option optimize_for = SPEED;
+
+
+package dto;
+option java_package = "com.xhs.redim.common.transport.protobuf.dto";
+option java_outer_classname = "RedIMMessageProto";
+
+ 
+// enum MessageElementType {
+  // Paragraph = 'paragraph',
+  // BlockQuote = 'block-quote',
+  // BulletedList = 'bulleted-list',
+  // NumberedList = 'numbered-list',
+  // Image = 'image',
+  // Mention = 'mention',
+  // Link = 'link',
+  // Text = 'text',
+// }
+
+/**
+  消息type和messageData多对一
+ */
+message MessageData {
+  oneof content {
+    PlainText plainText = 1;
+    RichText richText = 2;
+    Image image = 3;
+    ControlMessageData controlMessageData = 4;
+    Dummy dummy = 5;
+  }
+}
+
+message PlainText {
+  string text = 1;
+}
+
+message RichText {
+  TreeNode root = 1;
+  repeated MessageElement elements = 2;
+}
+
+message ControlMessageData {
+  string json = 1;
+}
+
+message Dummy {
+  string content = 1;
+}
+
+message TreeNode {
+  string id = 1;
+  string type = 2;
+  repeated TreeNode children = 3;
+}
+
+message MessageElement {
+  string id = 1;
+  string type = 2;
+  oneof content {
+    Text text = 3;
+    Mention mention = 4;
+    Link link = 5;
+    Paragraph paragraph = 6;
+    BulletedList bulletedList = 7;
+    NumberedList numberedList = 8;
+    Image image = 9;
+    Quote quote = 10;
+  }
+}
+
+message Paragraph {
+}
+
+message BulletedList {
+  int32 level = 1;
+}
+
+message NumberedList {
+  int32 level = 1;
+  int32 index = 2;
+}
+
+message Quote {
+}
+
+message Image {
+  string url = 1;
+  int32 width = 2;
+  int32 height = 3;
+  string align = 4;
+  string ext = 5;
+  string key = 6;
+}
+
+
+message Text {
+  string text = 1;
+  bool strikethrough = 2;
+  bool underline = 3;
+  bool italic = 4;
+  bool bold = 5;
+  Color color = 6;
+}
+
+message Link {
+  string href = 1;
+  string title = 2;
+  int32 linkType = 3;
+}
+
+message Mention {
+  string mentionType = 1;
+  string mentionId = 2;
+  string mentionName = 3;
+}
+
+message Color {
+  string color = 1;
+  string backgroundColor = 2;
+}
+

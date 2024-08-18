@@ -1,0 +1,25 @@
+syntax = "proto3";
+option optimize_for = SPEED;
+
+package dto;
+option java_package = "com.xhs.redim.common.transport.protobuf.dto";
+option java_outer_classname = "RedIMClientSideTransportProto";
+
+//客户端发送
+//服务端接收
+message RedIMClientSideTransport {
+  enum Type {
+    PING = 0;
+  }
+
+  Type type = 1;
+
+  oneof Payload {
+      Ping ping = 2;
+  }
+}
+
+message Ping {
+  repeated string activeConvId = 1;
+}
+//protoc RedIMTransportProto.proto --java_out=../dto
